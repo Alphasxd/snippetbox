@@ -14,7 +14,7 @@ type SnippetModel struct {
 
 // 向 snippets 表插入新的记录，返回新记录的 id 值
 func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
-	// 创建 SQL statement，用于向数据库插入新的记录，使用占位符代替参数
+	// SQL statement，用于向数据库插入新的记录，使用占位符代替参数
 	stmt := `INSERT INTO snippets (title, content, created, expires)
 	VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY))`
 
@@ -38,7 +38,7 @@ func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 
 // 通过 id 从 snippets 表中获取指定的记录
 func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
-	// 创建 SQL statement，用于从数据库中检索数据
+	// SQL statement，用于从数据库中检索特定的数据
 	stmt := `SELECT id, title, content, created, expires FROM snippets
     WHERE expires > UTC_TIMESTAMP() AND id = ?`
 
@@ -65,5 +65,38 @@ func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 
 // 获取 snippets 表中的最新 10 条记录，返回一个包含了这些记录的 []*Snippet 类型的切片
 func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
-	return nil, nil
+	// SQL statement，用于从数据库中检索多行数据
+	stmt := `SELECT id, title, content, created, expires FROM snippets
+    WHERE expires > UTC_TIMESTAMP() ORDER BY created DESC LIMIT 10`
+
+	// 使用 Query() 方法执行 SQL statement，返回一个 sql.Rows 结果集
+	rows, err := m.DB.Query(stmt)
+	if err != nil {
+		return nil, err
+	}
+	// 关闭 sql.Rows 结果集，确保在函数返回时关闭结果集，以防止数据库连接泄漏
+	defer rows.Close()
+
+	// 初始化一个指向 Snippet struct 的指针切片
+	snippets := []*models.Snippet{}
+
+	// 使用 rows.Next() 方法在每次迭代循环遍历结果集中的每一行记录
+	// 遍历完毕后会自动关闭结果集和数据库连接
+	for rows.Next() {
+		s := &models.Snippet{}
+		err = rows.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+		if err != nil {
+			return nil, err
+		}
+		// 将指向当前记录的指针追加到切片中
+		snippets = append(snippets, s)
+	}
+
+	// 如果在遍历过程中发生任何错误，则使用 rows.Err() 方法捕获该错误
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// 如果没有发生错误，则返回 Snippet struct 的指针切片
+	return snippets, nil
 }
