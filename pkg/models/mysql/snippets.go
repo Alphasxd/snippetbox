@@ -7,7 +7,7 @@ import (
 	"github.com/Alphasxd/snippetbox/pkg/models"
 )
 
-// 定义一个 SnippetModel 的 struct 类型，封装了一个 sql.DB 连接池
+// 定义一个 SnippetModel 的 struct 类型，封装了一个 sql.DB connection pool
 type SnippetModel struct {
 	DB *sql.DB
 }
