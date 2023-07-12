@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"html/template"
+	// "html/template"
 	"net/http"
 	"strconv"
 
@@ -32,26 +32,36 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/home.page.tmpl",
-		"./ui/html/base.layout.tmpl",
-		"./ui/html/footer.partial.tmpl",
-	}
-
-	// 使用 ParseFiles() 函数加载 home.page.tmpl 文件到一个模板集合中
-	ts, err := template.ParseFiles(files...)
+	s, err := app.snippets.Latest()
 	if err != nil {
-		// 调用 serverError() helper
 		app.serverError(w, err)
 		return
 	}
-	// 调用 Execute() 方法将模板传递给 http.ResponseWriter
-	// Execute() 方法接收两个参数：一个 http.ResponseWriter 和一个 template 数据对象
-	err = ts.Execute(w, nil)
-	if err != nil {
-		// 同样调用 serverError() helper
-		app.serverError(w, err)
+
+	for _, snippet := range s {
+		fmt.Fprintf(w, "%v\n", snippet)
 	}
+
+	// files := []string{
+	// 	"./ui/html/home.page.tmpl",
+	// 	"./ui/html/base.layout.tmpl",
+	// 	"./ui/html/footer.partial.tmpl",
+	// }
+
+	// // 使用 ParseFiles() 函数加载 home.page.tmpl 文件到一个模板集合中
+	// ts, err := template.ParseFiles(files...)
+	// if err != nil {
+	// 	// 调用 serverError() helper
+	// 	app.serverError(w, err)
+	// 	return
+	// }
+	// // 调用 Execute() 方法将模板传递给 http.ResponseWriter
+	// // Execute() 方法接收两个参数：一个 http.ResponseWriter 和一个 template 数据对象
+	// err = ts.Execute(w, nil)
+	// if err != nil {
+	// 	// 同样调用 serverError() helper
+	// 	app.serverError(w, err)
+	// }
 }
 
 // 定义一个 showSnippet 处理器函数
