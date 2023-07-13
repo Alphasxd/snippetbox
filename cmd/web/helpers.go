@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -26,15 +27,23 @@ func (app *application) notFound(w http.ResponseWriter) {
 }
 
 func (app *application) render(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
-	// 从 templateCache 字典中获取指定名称的模板，如果不存在，则调用 serverError() helper
+	// 从 templateCache 获取指定名称的模板，如果不存在，则调用 serverError() helper
 	ts, ok := app.templateCache[name]
 	if !ok {
 		app.serverError(w, fmt.Errorf("the template %s does not exist", name))
 		return
 	}
 
-	err := ts.Execute(w, td)
+	// 创建一个缓冲区，然后执行模板，将渲染的结果写入缓冲区
+	buf := new(bytes.Buffer)
+
+	// 将存储在 templateData 中的动态数据写入缓冲区
+	err := ts.Execute(buf, td)
 	if err != nil {
 		app.serverError(w, err)
+		return
 	}
+
+	// 将缓冲区的内容写入到 http.ResponseWriter
+	buf.WriteTo(w)
 }
