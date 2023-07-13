@@ -21,16 +21,10 @@ import (
 // mux := http.NewServeMux()
 // mux.HandleFunc("/path", home)
 
-// 定义一个 home 处理器函数
-// 修改 home 处理器函数，使其能够接收一个名为 app 的参数，该参数的类型是 application 结构体指针
+//  home handler
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	// 检查当前请求的 URL Path 是否与 "/" 匹配，如果不匹配则调用 http.NotFound() 函数
-	if r.URL.Path != "/" {
-		// 调用 notFound() helper
-		app.notFound(w)
-		return
-	}
 
+	// 通过调用 SnippetModel 的 Latest() 方法来获取最新的 10 个snippet
 	s, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(w, err)
@@ -43,11 +37,11 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// 定义一个 showSnippet 处理器函数
-// 修改 showSnippet 处理器函数，使其能够接收一个名为 app 的参数，该参数的类型是 application 结构体指针
+//  showSnippet handler
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
+
 	// 使用 r.URL.Query().Get() 方法获取 "id" 查询字符串参数的值
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	id, err := strconv.Atoi(r.URL.Query().Get(":id"))
 
 	// 如果参数不存在或者不是一个有效的数字，则返回一个 404 Not Found 响应
 	if err != nil || id < 1 {
@@ -72,33 +66,24 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// 定义一个 createSnippet 处理器函数
-// 修改 createSnippet 处理器函数，使其能够接收一个名为 app 的参数，该参数的类型是 application 结构体指针
+// createSnippetForm handler
+func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Create a new snippet..."))
+}
+
+// createSnippet handler
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
-	
-	// 使用 r.Method 变量检查请求的方法是否为 POST
-	if r.Method != http.MethodPost {
-		
-		// 使用 Header().Set() 方法设置响应头部的 "Allow: POST"
-		// 允许使用 POST 方法的请求通过，注意必须在调用 w.WriteHeader() 方法之前调用该方法
-		// Cautious handlers should read the Request.Body first, and then reply.
-		w.Header().Set("Allow", http.MethodPost)
-		// 调用 clientError() helper，传入 StatusMethodNotAllowed 状态码
-		app.clientError(w, http.StatusMethodNotAllowed)
-		return
-	}
 
 	// 创建一些假数据，以便稍后填充表单中的字段
 	title := "O snail"
 	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n- Kobayashi Issa"
 	expires := "7"
 
-	// 
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }
