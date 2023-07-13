@@ -31,7 +31,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 使用新的 render() helper 方法来渲染模板
+	// 使用 render() helper 方法来渲染模板
 	app.render(w, r, "home.page.tmpl", &templateData{
 		Snippets: s,
 	})
@@ -68,7 +68,8 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 
 // createSnippetForm handler
 func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Create a new snippet..."))
+
+	app.render(w, r, "create.page.tmpl", nil)
 }
 
 // createSnippet handler
