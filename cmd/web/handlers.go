@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
 
@@ -38,28 +37,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := &templateData{Snippets: s}
-
-	files := []string{
-		"./ui/html/home.page.tmpl",
-		"./ui/html/base.layout.tmpl",
-		"./ui/html/footer.partial.tmpl",
-	}
-
-	// 使用 ParseFiles() 函数加载 home.page.tmpl 文件到一个模板集合中
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		// 调用 serverError() helper
-		app.serverError(w, err)
-		return
-	}
-	// 调用 Execute() 方法将模板传递给 http.ResponseWriter
-	// Execute() 方法接收两个参数：一个 http.ResponseWriter 和一个 template 数据对象
-	err = ts.Execute(w, data)
-	if err != nil {
-		// 同样调用 serverError() helper
-		app.serverError(w, err)
-	}
+	// 使用新的 render() helper 方法来渲染模板
+	app.render(w, r, "home.page.tmpl", &templateData{
+		Snippets: s,
+	})
 }
 
 // 定义一个 showSnippet 处理器函数
@@ -85,24 +66,9 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := &templateData{Snippet: s}
-
-	files := []string{
-		"./ui/html/show.page.tmpl",
-		"./ui/html/base.layout.tmpl",
-		"./ui/html/footer.partial.tmpl",
-	}
-	
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	err = ts.Execute(w, data)
-	if err != nil {
-		app.serverError(w, err)
-	}
+	app.render(w, r, "show.page.tmpl", &templateData{
+		Snippet: s,
+	})
 
 }
 
