@@ -7,9 +7,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/Alphasxd/snippetbox/pkg/models/mysql"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golangcollege/sessions"
 )
 
 // 定义一个名为 application 的结构体
@@ -17,6 +19,7 @@ import (
 type application struct {
 	infoLog       *log.Logger
 	errorLog      *log.Logger
+	session       *sessions.Session
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template
 }
@@ -27,6 +30,9 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP newwork address")
 	// 使用 flag 完成对 DSN 的自定义设置，默认值为 web:web@/snippetbox?parseTime=true
 	dsn := flag.String("dsn", "web:web@/snippetbox?parseTime=true", "MySQL data source name")
+	// 使用 flag 完成对 secret key 的自定义设置，默认值为 s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge
+	secret := flag.String("secret", "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge", "Secret key")
+
 	// 使用 flag.Parse() 解析命令行参数，必须在使用 flag 之后，访问任何命令行参数之前调用
 	flag.Parse()
 
@@ -48,9 +54,13 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
+
 	app := &application{
 		errorLog: errorLog,
 		infoLog: infoLog,
+		session: session,
 		snippets: &mysql.SnippetModel{DB: db},
 		templateCache: templateCache,
 	}
