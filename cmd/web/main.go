@@ -74,10 +74,13 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr: *addr,
-		ErrorLog: errorLog,
-		Handler: app.routes(),
-		TLSConfig: tlsConfig,
+		Addr:         *addr,
+		ErrorLog:     errorLog,
+		Handler:      app.routes(),
+		TLSConfig:    tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	// 使用 log.Println() 记录启动 web server 的日志信息
