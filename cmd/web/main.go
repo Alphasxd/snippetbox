@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -66,15 +67,21 @@ func main() {
 		templateCache: templateCache,
 	}
 
+	// 初始化 tls.Config struct，设置服务器使用的 TLS 配置
+	tlsConfig := &tls.Config{
+		PreferServerCipherSuites: true,
+		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
+
 	srv := &http.Server{
 		Addr: *addr,
 		ErrorLog: errorLog,
-		Handler: app.routes(), // 调用 routes() 方法获取 servemux
+		Handler: app.routes(),
+		TLSConfig: tlsConfig,
 	}
 
 	// 使用 log.Println() 记录启动 web server 的日志信息
 	infoLog.Printf("Starting server on %s", *addr)
-
 	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errorLog.Fatal(err)
 }
