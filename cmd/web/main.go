@@ -56,6 +56,7 @@ func main() {
 
 	session := sessions.New([]byte(*secret))
 	session.Lifetime = 12 * time.Hour
+	session.Secure = true // 设置 session cookie 为安全的，只能通过 HTTPS 来传输
 
 	app := &application{
 		errorLog: errorLog,
@@ -74,8 +75,7 @@ func main() {
 	// 使用 log.Println() 记录启动 web server 的日志信息
 	infoLog.Printf("Starting server on %s", *addr)
 
-	// 使用新的 server 结构体启动 web server，替换上述代码
-	err = srv.ListenAndServe()
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errorLog.Fatal(err)
 }
 
