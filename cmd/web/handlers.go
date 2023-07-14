@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/Alphasxd/snippetbox/pkg/models"
 )
@@ -84,6 +86,34 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	title := r.PostForm.Get("title")
 	content := r.PostForm.Get("content")
 	expires := r.PostForm.Get("expires")
+
+	// 初始化一个 errors map，用来存储任何表单验证错误
+	errors := make(map[string]string)
+
+	// 验证 title 字段不为空且长度不超过 100 个字节
+	if strings.TrimSpace(title) == "" {
+		errors["title"] = "This field cannot be blank"
+	} else if utf8.RuneCountInString(title) > 100 {
+		errors["title"] = "This field is too long (maximum is 100 characters)"
+	}
+
+	// 验证 content 字段不为空
+	if strings.TrimSpace(content) == "" {
+		errors["content"] = "This field cannot be blank"
+	}
+
+	// 验证 expires 字段不为空，且值必须是 1、7 或者 365 中的一个
+	if strings.TrimSpace(expires) == "" {
+		errors["expires"] = "This field cannot be blank"
+	} else if expires != "1" && expires != "7" && expires != "365" {
+		errors["expires"] = "This field is invalid"
+	}
+
+	// 如果 errors map 不为空，则说明有错误发生，使用 errors map 来渲染表单
+	if len(errors) > 0 {
+		fmt.Fprint(w, errors)
+		return
+	}
 
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
