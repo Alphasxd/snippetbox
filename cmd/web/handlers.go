@@ -109,9 +109,12 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		errors["expires"] = "This field is invalid"
 	}
 
-	// 如果 errors map 不为空，则说明有错误发生，使用 errors map 来渲染表单
+	// 如果 errors map 不为空，重新渲染表单，并将验证错误信息和用于预填充表单的数据传递给模板
 	if len(errors) > 0 {
-		fmt.Fprint(w, errors)
+		app.render(w, r, "create.page.tmpl", &templateData{
+			FormErrors: errors,
+			FormData: r.PostForm,
+		})
 		return
 	}
 
