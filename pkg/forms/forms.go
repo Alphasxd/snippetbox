@@ -3,9 +3,12 @@ package forms
 import (
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 	"unicode/utf8"
 )
+
+var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 // 创建一个自定义 Form struct
 // 匿名嵌入 url.Values 字段，用来保持表单字段的值
@@ -61,6 +64,26 @@ func (f *Form) PermittedValues(field string, opts ...string) {
 		}
 	}
 	f.Errors.Add(field, "This field is invalid")
+}
+
+func (f *Form) MinLength(field string, d int) {
+	value := f.Get("field")
+	if value == "" {
+		return
+	}
+	if utf8.RuneCountInString(value) < d {
+		f.Errors.Add(field, fmt.Sprintf("This field is too short (minimum is %d characters)", d))
+	}
+}
+
+func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
+	value := f.Get("field")
+	if value == "" {
+		return
+	}
+	if !pattern.MatchString(value) {
+		f.Errors.Add(field, "This field is invalid")
+	}
 }
 
 // 实现一个 Valid() 方法，用来检测表单中是否有任何错误
