@@ -70,6 +70,7 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 // createSnippetForm handler Get()
 func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
 
+	// 使用 create.page.tmpl 模板渲染一个空白的表单
 	app.render(w, r, "create.page.tmpl", &templateData{
 		Form: forms.New(nil),
 	})
@@ -107,6 +108,8 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 
 // signupUserForm handler Get()
 func (app *application) signupUserForm(w http.ResponseWriter, r *http.Request) {
+
+	// 使用 signup.page.tmpl 模板渲染一个空的表单
 	app.render(w, r, "signup.page.tmpl", &templateData{
 		Form: forms.New(nil),
 	})
@@ -114,6 +117,8 @@ func (app *application) signupUserForm(w http.ResponseWriter, r *http.Request) {
 
 // signupUser handler Post()
 func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
+
+	// 解析表单
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
@@ -151,6 +156,8 @@ func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
 
 // loginUserForm handler Get()
 func (app *application) loginUserForm(w http.ResponseWriter, r *http.Request) {
+
+	// 渲染一个空的表单
 	app.render(w, r, "login.page.tmpl", &templateData{
 		Form: forms.New(nil),
 	})
@@ -158,6 +165,8 @@ func (app *application) loginUserForm(w http.ResponseWriter, r *http.Request) {
 
 // loginUser handler Post()
 func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
+
+	// 解析表单
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
@@ -183,5 +192,11 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
 
 // logoutUser handler Post()
 func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Logout the user...")
+
+	// 删除 session 中的 "authenticatedUserID" 键，以此来表示用户已经退出登录
+	app.session.Remove(r, "authenticatedUserID")
+	app.session.Put(r, "flash", "You've been logged out successfully!")
+
+	// 回到主页
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
