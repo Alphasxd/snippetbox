@@ -11,9 +11,16 @@ import (
 	"time"
 
 	"github.com/Alphasxd/snippetbox/pkg/models/mysql"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golangcollege/sessions"
 )
+
+// 自定义一个类型，用于存储上下文密钥
+type contextKey string
+
+// 类型转换，将字符串转换为 contextKey 类型
+const contextKeyIsAuthenticated = contextKey("isAuthenticated")
 
 // 定义一个名为 application 的结构体
 // 用于存储依赖注入的值，以及需要在整个应用程序中共享的状态信息

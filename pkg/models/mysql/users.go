@@ -74,5 +74,21 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 }
 
 func (m *UserModel) Get(id int) (*models.User, error) {
-	return nil, nil
+	
+	stmt := `SELECT id, name, email, created, active FROM users WHERE id = ?`
+	row := m.DB.QueryRow(stmt, id)
+
+	// 初始化一个指向 User struct 的指针
+	u := &models.User{}
+
+	err := row.Scan(&u.ID, &u.Name, &u.Email, &u.Created, &u.Active)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.ErrNoRecord
+		} else {
+			return nil, err
+		}
+	}
+
+	return u, nil
 }

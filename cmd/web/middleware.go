@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/Alphasxd/snippetbox/pkg/models"
+	
 	"github.com/justinas/nosurf"
 )
 
@@ -68,4 +72,32 @@ func noSurf(next http.Handler) http.Handler {
 	})
 
 	return csrfHandler
+}
+
+func (app *application) authenticate(next http.Handler) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// 检查用户是否在存在 session 中，如果不存在则调用 next.ServeHTTP() 方法
+		exists := app.session.Exists(r, "authenticatedUserID")
+		if !exists {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// 从 session 中获取用户的 ID，然后从数据库中检索相关的用户记录 
+		// 如果没有找到匹配的记录，或者用户处于非活动状态，则将 session 从用户的浏览器中删除并调用 next.ServeHTTP() 方法
+		user, err := app.users.Get(app.session.GetInt(r, "authenticatedUserID"))
+		if errors.Is(err, models.ErrNoRecord) || !user.Active {
+			app.session.Remove(r, "authenticatedUserID")
+			next.ServeHTTP(w, r)
+			return
+		} else if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		// 
+		ctx := context.WithValue(r.Context(), contextKeyIsAuthenticated, true)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}) 
 }
