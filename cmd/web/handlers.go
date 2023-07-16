@@ -22,7 +22,7 @@ import (
 // mux := http.NewServeMux()
 // mux.HandleFunc("/path", home)
 
-//  home handler
+//  home handler Get()
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	// 通过调用 SnippetModel 的 Latest() 方法来获取最新的 10 个snippet
@@ -38,7 +38,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-//  showSnippet handler
+//  showSnippet handler Get()
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 
 	// 使用 r.URL.Query().Get() 方法获取 "id" 查询字符串参数的值
@@ -67,7 +67,7 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// createSnippetForm handler
+// createSnippetForm handler Get()
 func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
 
 	app.render(w, r, "create.page.tmpl", &templateData{
@@ -75,7 +75,7 @@ func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request
 	})
 }
 
-// createSnippet handler
+// createSnippet handler Post()
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
@@ -105,12 +105,14 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }
 
+// signupUserForm handler Get()
 func (app *application) signupUserForm(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "signup.page.tmpl", &templateData{
 		Form: forms.New(nil),
 	})
 }
 
+// signupUser handler Post()
 func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -147,16 +149,39 @@ func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// loginUserForm handler Get()
 func (app *application) loginUserForm(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "login.page.tmpl", &templateData{
 		Form: forms.New(nil),
 	})
 }
 
+// loginUser handler Post()
 func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Authenticate and login the user...")
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+	id, err := app.users.Authenticate(form.Get("email"), form.Get("password"))
+	if err != nil {
+		if errors.Is(err, models.ErrInvalidCredentials) {
+			form.Errors.Add("generic", "Email or Password is incorrect")
+			app.render(w, r, "login.page.tmpl", &templateData{Form: form})
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	app.session.Put(r, "authenticatedUserID", id)
+
+	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
 }
 
+// logoutUser handler Post()
 func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Logout the user...")
 }
