@@ -10,7 +10,8 @@ import (
 )
 
 type templateData struct {
-	CurrentYear int
+	CSRFToken	    string
+	CurrentYear     int
 	Flash           string
 	Form            *forms.Form
 	IsAuthenticated bool
