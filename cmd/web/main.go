@@ -58,7 +58,7 @@ func main() {
 	// 关闭数据库连接
 	defer db.Close()
 
-	templateCache, err := newTemplateCache("./ui/html")
+	templateCache, err := newTemplateCache()
 	if err != nil {
 		errorLog.Fatal(err)
 	}

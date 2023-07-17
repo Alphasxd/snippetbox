@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 
+	"github.com/Alphasxd/snippetbox/ui"
+	
 	"github.com/bmizerany/pat"
 	"github.com/justinas/alice"
 )
@@ -26,8 +28,8 @@ func (app *application) routes() http.Handler {
 	mux.Post("/user/login", dynamicMiddleware.ThenFunc(app.loginUser))
 	mux.Post("/user/logout", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.logoutUser))
 
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Get("/static/", http.StripPrefix("/static", fileServer))
+	fileServer := http.FileServer(http.FS(ui.Files))
+	mux.Get("/static/", fileServer)
 
 	return standardMiddleware.Then(mux)
 }
