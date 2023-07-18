@@ -200,3 +200,7 @@ func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
 	// 回到主页
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
+
+func (app *application) about(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "about.page.tmpl", nil)
+}
