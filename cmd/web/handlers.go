@@ -204,3 +204,18 @@ func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
 func (app *application) about(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "about.page.tmpl", nil)
 }
+
+func (app *application) userProfile(w http.ResponseWriter, r *http.Request) {
+
+	userID := app.session.GetInt(r, "authenticatedUserID")
+
+	user, err := app.users.Get(userID)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.render(w, r, "profile.page.tmpl", &templateData{
+		User: user,
+	})
+}
