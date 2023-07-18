@@ -53,6 +53,7 @@ func (app *application) requireAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// 如果用户没有通过身份验证，将用户重定向到登录页面
 		if !app.isAuthenticated(r) {
+			app.session.Put(r, "redirectPathAfterLogin", r.URL.Path)
 			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 			return
 		}
