@@ -10,11 +10,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// UserModel 定义一个 UserModel 的 struct 类型，封装了一个 sql.DB connection pool
 type UserModel struct {
 	DB *sql.DB
 }
 
-// 创建新用户，将用户信息插入到数据库中
+// Insert 创建新用户，将用户信息插入到数据库中
 func (m *UserModel) Insert(name, email, password string) error {
 
 	// 首先对密码进行哈希处理
@@ -41,7 +42,7 @@ func (m *UserModel) Insert(name, email, password string) error {
 	return nil
 }
 
-// 验证用户登录
+// Authenticate 验证用户登录
 func (m *UserModel) Authenticate(email, password string) (int, error) {
 
 	var id int
@@ -73,8 +74,9 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 	return id, nil
 }
 
+// Get 通过用户 id 获取用户信息
 func (m *UserModel) Get(id int) (*models.User, error) {
-	
+
 	stmt := `SELECT id, name, email, created, active FROM users WHERE id = ?`
 	row := m.DB.QueryRow(stmt, id)
 
@@ -93,6 +95,7 @@ func (m *UserModel) Get(id int) (*models.User, error) {
 	return u, nil
 }
 
+// ChangePassword 修改用户密码
 func (m *UserModel) ChangePassword(id int, currentPassword, newPassword string) error {
 	var currentHashedPassword []byte
 	row := m.DB.QueryRow("SELECT hashed_password FROM users WHERE id = ?", id)
@@ -109,7 +112,6 @@ func (m *UserModel) ChangePassword(id int, currentPassword, newPassword string) 
 			return err
 		}
 	}
-
 
 	newHashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
 	if err != nil {
