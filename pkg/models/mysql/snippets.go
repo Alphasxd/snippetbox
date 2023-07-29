@@ -7,12 +7,12 @@ import (
 	"github.com/Alphasxd/snippetbox/pkg/models"
 )
 
-// SnippetModel 定义一个 SnippetModel 的 struct 类型，封装了一个 sql.DB connection pool
+// 定义一个 SnippetModel 的 struct 类型，封装了一个 sql.DB connection pool
 type SnippetModel struct {
 	DB *sql.DB
 }
 
-// Insert 向 snippets 表插入新的记录，返回新记录的 id 值
+// 向 snippets 表插入新的记录，返回新记录的 id 值
 func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 	// SQL statement，用于向数据库插入新的记录，使用占位符代替参数
 	stmt := `INSERT INTO snippets (title, content, created, expires)
@@ -36,7 +36,7 @@ func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 	return int(id), nil
 }
 
-// Get 通过 id 从 snippets 表中获取指定的记录
+// 通过 id 从 snippets 表中获取指定的记录
 func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 	// SQL statement，用于从数据库中检索特定的数据
 	stmt := `SELECT id, title, content, created, expires FROM snippets
@@ -63,7 +63,7 @@ func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 	return s, nil
 }
 
-// Latest 获取 snippets 表中的最新 10 条记录，返回一个包含了这些记录的 []*Snippet 类型的切片
+// 获取 snippets 表中的最新 10 条记录，返回一个包含了这些记录的 []*Snippet 类型的切片
 func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
 	// SQL statement，用于从数据库中检索多行数据
 	stmt := `SELECT id, title, content, created, expires FROM snippets
