@@ -75,10 +75,15 @@ func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
 		return nil, err
 	}
 	// 关闭 sql.Rows 结果集，确保在函数返回时关闭结果集，以防止数据库连接泄漏
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			return
+		}
+	}(rows)
 
 	// 初始化一个指向 Snippet struct 的指针切片
-	snippets := []*models.Snippet{}
+	var snippets []*models.Snippet
 
 	// 使用 rows.Next() 方法在每次迭代循环遍历结果集中的每一行记录
 	// 遍历完毕后会自动关闭结果集和数据库连接
