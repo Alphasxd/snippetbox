@@ -83,8 +83,7 @@ func main() {
 
 	// 初始化 tls.Config struct，设置服务器使用的 TLS 配置
 	tlsConfig := &tls.Config{
-		PreferServerCipherSuites: true, // 优先选择服务器加密套件
-		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
 
 	srv := &http.Server{
