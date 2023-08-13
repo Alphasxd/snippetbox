@@ -101,7 +101,7 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.session.Put(r, "flash", "Snippet sucessfully created!")
+	app.session.Put(r, "flash", "Snippet successfully created!")
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }
@@ -148,7 +148,7 @@ func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.session.Put(r, "flash", "Your signup was sucessful. Please log in.")
+	app.session.Put(r, "flash", "Your signup was successful. Please log in.")
 
 	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 

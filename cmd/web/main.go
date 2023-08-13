@@ -36,7 +36,7 @@ type application struct {
 func main() {
 
 	// 使用 flag 完成对服务端口的自定义设置，默认端口为 4000
-	addr := flag.String("addr", ":4000", "HTTP newwork address")
+	addr := flag.String("addr", ":4000", "HTTP network address")
 	// 使用 flag 完成对 DSN 的自定义设置，默认值为 web:web@/snippetbox?parseTime=true
 	dsn := flag.String("dsn", "web:web@/snippetbox?parseTime=true", "MySQL data source name")
 	// 使用 flag 完成对 secret key 的自定义设置，默认值为 s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge
@@ -56,7 +56,12 @@ func main() {
 		errorLog.Fatal(err)
 	}
 	// 关闭数据库连接
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			errorLog.Fatal(err)
+		}
+	}(db)
 
 	templateCache, err := newTemplateCache()
 	if err != nil {
@@ -78,7 +83,7 @@ func main() {
 
 	// 初始化 tls.Config struct，设置服务器使用的 TLS 配置
 	tlsConfig := &tls.Config{
-		PreferServerCipherSuites: true,
+		PreferServerCipherSuites: true, // 优先选择服务器加密套件
 		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
 
