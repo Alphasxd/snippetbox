@@ -14,7 +14,10 @@ import (
 func (app *application) serverError(w http.ResponseWriter, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 	// 使用 app.errorLog.Output() 方法将错误信息写入日志，第一个参数为调用栈的深度，第二个参数为错误信息
-	app.errorLog.Output(2, trace)
+	err = app.errorLog.Output(2, trace)
+	if err != nil {
+		return
+	}
 
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
@@ -64,7 +67,10 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 	}
 
 	// 将缓冲区的内容写入到 http.ResponseWriter
-	buf.WriteTo(w)
+	_, err = buf.WriteTo(w)
+	if err != nil {
+		return
+	}
 }
 
 // isAuthenticated() helper 检查用户是否已经通过身份验证
