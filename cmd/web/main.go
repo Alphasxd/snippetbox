@@ -68,11 +68,11 @@ func main() {
 	session.Secure = true // 设置 session cookie 为安全的，只能通过 HTTPS 来传输
 
 	app := &application{
-		errorLog: errorLog,
-		infoLog: infoLog,
-		session: session,
-		snippets: &mysql.SnippetModel{DB: db},
-		users: &mysql.UserModel{DB: db},
+		errorLog:      errorLog,
+		infoLog:       infoLog,
+		session:       session,
+		snippets:      &mysql.SnippetModel{DB: db},
+		users:         &mysql.UserModel{DB: db},
 		templateCache: templateCache,
 	}
 
@@ -98,6 +98,7 @@ func main() {
 	errorLog.Fatal(err)
 }
 
+// openDB() 函数尝试连接到数据库，如果连接成功，则返回一个 sql.DB 对象
 func openDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {

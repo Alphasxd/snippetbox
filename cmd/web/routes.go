@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	"github.com/Alphasxd/snippetbox/ui"
-	
+
 	"github.com/bmizerany/pat"
 	"github.com/justinas/alice"
 )
 
-
+// routes() 方法返回一个标准的 http.Handler 来处理所有的静态和动态路由
 func (app *application) routes() http.Handler {
 
 	// 创建一个包含标准中间件的的中间件链，将会应用到每一个请求上。

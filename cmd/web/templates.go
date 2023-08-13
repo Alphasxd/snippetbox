@@ -11,17 +11,19 @@ import (
 	"github.com/Alphasxd/snippetbox/ui"
 )
 
+// templateData 用于存储应用程序中的动态数据，这些数据将传递到 HTML 模板中
 type templateData struct {
-	CSRFToken	    string
+	CSRFToken       string
 	CurrentYear     int
 	Flash           string
 	Form            *forms.Form
 	IsAuthenticated bool
 	Snippet         *models.Snippet
 	Snippets        []*models.Snippet
-	User			*models.User
+	User            *models.User
 }
 
+// humanDate 将时间对象格式化为人类可读的字符串
 func humanDate(t time.Time) string {
 	if t.IsZero() {
 		return ""
@@ -30,10 +32,11 @@ func humanDate(t time.Time) string {
 	return t.UTC().Format("02 Jan 2006 at 15:04")
 }
 
-var functions = template.FuncMap {
+var functions = template.FuncMap{
 	"humanDate": humanDate,
 }
 
+// newTemplateCache 用于创建一个新的模板缓存
 func newTemplateCache() (map[string]*template.Template, error) {
 	// 初始化一个新的模板缓存 map
 	cache := map[string]*template.Template{}
@@ -67,10 +70,9 @@ func newTemplateCache() (map[string]*template.Template, error) {
 		}
 
 		// 将 template.Template 对象添加到缓存 map 中，键是文件名
-		cache[name] = ts 
+		cache[name] = ts
 	}
 
 	// 返回模板缓存 map
 	return cache, nil
 }
-

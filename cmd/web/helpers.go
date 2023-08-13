@@ -29,6 +29,7 @@ func (app *application) notFound(w http.ResponseWriter) {
 	app.clientError(w, http.StatusNotFound)
 }
 
+// addDefaultData() helper 将一些通用的动态数据添加到模板中
 func (app *application) addDefaultData(td *templateData, r *http.Request) *templateData {
 	if td == nil {
 		td = &templateData{}
@@ -43,6 +44,7 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	return td
 }
 
+// render() helper 将指定的模板渲染成字节，并将其写入到 http.ResponseWriter
 func (app *application) render(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
 	// 从 templateCache 获取指定名称的模板，如果不存在，则调用 serverError() helper
 	ts, ok := app.templateCache[name]
@@ -65,6 +67,7 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 	buf.WriteTo(w)
 }
 
+// isAuthenticated() helper 检查用户是否已经通过身份验证
 func (app *application) isAuthenticated(r *http.Request) bool {
 	isAuthenticated, ok := r.Context().Value(contextKeyIsAuthenticated).(bool)
 	if !ok {

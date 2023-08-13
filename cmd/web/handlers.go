@@ -22,7 +22,7 @@ import (
 // mux := http.NewServeMux()
 // mux.HandleFunc("/path", home)
 
-//  home handler Get()
+// home handler Get()
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	// 通过调用 SnippetModel 的 Latest() 方法来获取最新的 10 个snippet
@@ -38,7 +38,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-//  showSnippet handler Get()
+// showSnippet handler Get()
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 
 	// 使用 r.URL.Query().Get() 方法获取 "id" 查询字符串参数的值
@@ -207,6 +207,7 @@ func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// about handler Get()
 func (app *application) about(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "about.page.tmpl", nil)
 }
@@ -226,12 +227,14 @@ func (app *application) userProfile(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// changePasswordForm handler Get()
 func (app *application) changePasswordForm(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "password.page.tmpl", &templateData{
 		Form: forms.New(nil),
 	})
 }
 
+// changePassword handler Post()
 func (app *application) changePassword(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {

@@ -7,10 +7,11 @@ import (
 	"net/http"
 
 	"github.com/Alphasxd/snippetbox/pkg/models"
-	
+
 	"github.com/justinas/nosurf"
 )
 
+// secureHeaders 中间件将一些安全的响应标头添加到每个响应中
 func secureHeaders(next http.Handler) http.Handler {
 
 	// 设置希望添加到响应中的标准的安全标头
@@ -22,6 +23,7 @@ func secureHeaders(next http.Handler) http.Handler {
 	})
 }
 
+// logRequest 中间件将所有请求的远程地址和 HTTP 方法记录到应用的日志中
 func (app *application) logRequest(next http.Handler) http.Handler {
 
 	// logRequest 中间件将所有请求的远程地址和 HTTP 方法记录到应用的日志中
@@ -32,6 +34,7 @@ func (app *application) logRequest(next http.Handler) http.Handler {
 	})
 }
 
+// recoverPanic 中间件用于恢复 panic
 func (app *application) recoverPanic(next http.Handler) http.Handler {
 
 	// 恢复 panic，如果发生 panic，则将堆栈跟踪信息写入日志，可以防止应用程序崩溃
@@ -47,6 +50,7 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 	})
 }
 
+// requireAuthentication 中间件用于验证用户是否已通过身份验证
 func (app *application) requireAuthentication(next http.Handler) http.Handler {
 
 	// 鉴定用户是否已经通过身份验证
@@ -57,24 +61,26 @@ func (app *application) requireAuthentication(next http.Handler) http.Handler {
 			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 			return
 		}
-		
+
 		// 否则，将 header 中的 Cache-Control 字段设置为 no-store，这样用户每次访问受保护的页面时，都会向服务器发送请求
 		w.Header().Add("Cache-Control", "no-store")
 		next.ServeHTTP(w, r)
 	})
 }
 
+// noSurf 中间件用于防止 CSRF 攻击
 func noSurf(next http.Handler) http.Handler {
 	csrfHandler := nosurf.New(next)
 	csrfHandler.SetBaseCookie(http.Cookie{
 		HttpOnly: true,
-		Path: "/",
-		Secure: true,
+		Path:     "/",
+		Secure:   true,
 	})
 
 	return csrfHandler
 }
 
+// authenticate 中间件用于检查用户是否已通过身份验证
 func (app *application) authenticate(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -85,7 +91,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		// 从 session 中获取用户的 ID，然后从数据库中检索相关的用户记录 
+		// 从 session 中获取用户的 ID，然后从数据库中检索相关的用户记录
 		// 如果没有找到匹配的记录，或者用户处于非活动状态，则将 session 从用户的浏览器中删除并调用 next.ServeHTTP() 方法
 		user, err := app.users.Get(app.session.GetInt(r, "authenticatedUserID"))
 		if errors.Is(err, models.ErrNoRecord) || !user.Active {
@@ -97,8 +103,8 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		// 
+		//
 		ctx := context.WithValue(r.Context(), contextKeyIsAuthenticated, true)
 		next.ServeHTTP(w, r.WithContext(ctx))
-	}) 
+	})
 }
