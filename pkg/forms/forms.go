@@ -10,15 +10,15 @@ import (
 
 var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
-// 创建一个自定义 Form struct
+// Form 创建一个自定义 Form struct
 // 匿名嵌入 url.Values 字段，用来保持表单字段的值
 // 以及一个 Errors 字段，用来保存表单验证错误信息
 type Form struct {
 	url.Values // anonymous field，Form struct 会继承 url.Values 的所有方法，譬如 Get() 和 Add()
-	Errors errors
+	Errors     errors
 }
 
-// 实现一个 New() 函数，用来初始化一个自定义的 Form struct
+// New 实现一个 New() 函数，用来初始化一个自定义的 Form struct
 func New(data url.Values) *Form {
 	return &Form{
 		data,
@@ -26,7 +26,7 @@ func New(data url.Values) *Form {
 	}
 }
 
-// 实现一个 Required() 方法，用来检测指定的字段是否为空
+// Required 实现一个 Required() 方法，用来检测指定的字段是否为空
 func (f *Form) Required(fields ...string) {
 	// 使用 fields ...string 作为参数类型，可以让函数接受任意数量的字符串参数，而不需要显式地创建一个字符串切片。
 	// 这样可以提高函数的灵活性和可用性，使得函数可以接受不同数量的参数。
@@ -41,7 +41,7 @@ func (f *Form) Required(fields ...string) {
 	}
 }
 
-// 实现一个 MaxLength() 方法，用来检测指定的字段的值的长度是否超过了给定的最大长度
+// MaxLength 实现一个 MaxLength() 方法，用来检测指定的字段的值的长度是否超过了给定的最大长度
 func (f *Form) MaxLength(field string, d int) {
 	value := f.Get(field)
 	if value == "" {
@@ -52,7 +52,7 @@ func (f *Form) MaxLength(field string, d int) {
 	}
 }
 
-// 实现一个 PermittedValues() 方法，用来检测指定的字段的值是否在指定的值列表中
+// PermittedValues 实现一个 PermittedValues() 方法，用来检测指定的字段的值是否在指定的值列表中
 func (f *Form) PermittedValues(field string, opts ...string) {
 	value := f.Get(field)
 	if value == "" {
@@ -67,26 +67,26 @@ func (f *Form) PermittedValues(field string, opts ...string) {
 }
 
 func (f *Form) MinLength(field string, d int) {
-    value := f.Get(field)
-    if value == "" {
-        return
-    }
-    if utf8.RuneCountInString(value) < d {
-        f.Errors.Add(field, fmt.Sprintf("This field is too short (minimum is %d characters)", d))
-    }
+	value := f.Get(field)
+	if value == "" {
+		return
+	}
+	if utf8.RuneCountInString(value) < d {
+		f.Errors.Add(field, fmt.Sprintf("This field is too short (minimum is %d characters)", d))
+	}
 }
 
 func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
-    value := f.Get(field)
-    if value == "" {
-        return
-    }
-    if !pattern.MatchString(value) {
-        f.Errors.Add(field, "This field is invalid")
-    }
+	value := f.Get(field)
+	if value == "" {
+		return
+	}
+	if !pattern.MatchString(value) {
+		f.Errors.Add(field, "This field is invalid")
+	}
 }
 
-// 实现一个 Valid() 方法，用来检测表单中是否有任何错误
+// Valid 实现一个 Valid() 方法，用来检测表单中是否有任何错误
 func (f *Form) Valid() bool {
 	return len(f.Errors) == 0
 }
