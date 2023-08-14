@@ -14,7 +14,7 @@
 
 ## Create Snippet
 
-![create snippet](ui/static/img/create snippet.png)
+![create snippet](ui/static/img/create.png)
 
 ## Profile
 
