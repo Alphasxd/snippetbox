@@ -36,7 +36,7 @@ type application struct {
 func main() {
 
 	// 使用 flag 完成对服务端口的自定义设置，默认端口为 4000
-	addr := flag.String("addr", ":4000", "HTTP newwork address")
+	addr := flag.String("addr", ":4000", "HTTP network address")
 	// 使用 flag 完成对 DSN 的自定义设置，默认值为 web:web@/snippetbox?parseTime=true
 	dsn := flag.String("dsn", "web:web@/snippetbox?parseTime=true", "MySQL data source name")
 	// 使用 flag 完成对 secret key 的自定义设置，默认值为 s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge
@@ -56,7 +56,12 @@ func main() {
 		errorLog.Fatal(err)
 	}
 	// 关闭数据库连接
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			errorLog.Fatal(err)
+		}
+	}(db)
 
 	templateCache, err := newTemplateCache()
 	if err != nil {
@@ -68,18 +73,17 @@ func main() {
 	session.Secure = true // 设置 session cookie 为安全的，只能通过 HTTPS 来传输
 
 	app := &application{
-		errorLog: errorLog,
-		infoLog: infoLog,
-		session: session,
-		snippets: &mysql.SnippetModel{DB: db},
-		users: &mysql.UserModel{DB: db},
+		errorLog:      errorLog,
+		infoLog:       infoLog,
+		session:       session,
+		snippets:      &mysql.SnippetModel{DB: db},
+		users:         &mysql.UserModel{DB: db},
 		templateCache: templateCache,
 	}
 
 	// 初始化 tls.Config struct，设置服务器使用的 TLS 配置
 	tlsConfig := &tls.Config{
-		PreferServerCipherSuites: true,
-		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
 
 	srv := &http.Server{
@@ -98,6 +102,7 @@ func main() {
 	errorLog.Fatal(err)
 }
 
+// openDB() 函数尝试连接到数据库，如果连接成功，则返回一个 sql.DB 对象
 func openDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {

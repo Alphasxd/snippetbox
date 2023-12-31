@@ -7,12 +7,12 @@ import (
 	"github.com/Alphasxd/snippetbox/pkg/models"
 )
 
-// 定义一个 SnippetModel 的 struct 类型，封装了一个 sql.DB connection pool
+// SnippetModel 定义一个 SnippetModel 的 struct 类型，封装了一个 sql.DB connection pool
 type SnippetModel struct {
 	DB *sql.DB
 }
 
-// 向 snippets 表插入新的记录，返回新记录的 id 值
+// Insert 向 snippets 表插入新的记录，返回新记录的 id 值
 func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 	// SQL statement，用于向数据库插入新的记录，使用占位符代替参数
 	stmt := `INSERT INTO snippets (title, content, created, expires)
@@ -36,7 +36,7 @@ func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 	return int(id), nil
 }
 
-// 通过 id 从 snippets 表中获取指定的记录
+// Get 通过 id 从 snippets 表中获取指定的记录
 func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 	// SQL statement，用于从数据库中检索特定的数据
 	stmt := `SELECT id, title, content, created, expires FROM snippets
@@ -63,7 +63,7 @@ func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 	return s, nil
 }
 
-// 获取 snippets 表中的最新 10 条记录，返回一个包含了这些记录的 []*Snippet 类型的切片
+// Latest 获取 snippets 表中的最新 10 条记录，返回一个包含了这些记录的 []*Snippet 类型的切片
 func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
 	// SQL statement，用于从数据库中检索多行数据
 	stmt := `SELECT id, title, content, created, expires FROM snippets
@@ -75,10 +75,15 @@ func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
 		return nil, err
 	}
 	// 关闭 sql.Rows 结果集，确保在函数返回时关闭结果集，以防止数据库连接泄漏
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			return
+		}
+	}(rows)
 
 	// 初始化一个指向 Snippet struct 的指针切片
-	snippets := []*models.Snippet{}
+	var snippets []*models.Snippet
 
 	// 使用 rows.Next() 方法在每次迭代循环遍历结果集中的每一行记录
 	// 遍历完毕后会自动关闭结果集和数据库连接
